@@ -8,7 +8,9 @@
 #include <sys/types.h>	 // socket()
 #include <unistd.h>		 // dup()
 
-#include <limits>  // std::numeric_limits<>
+#include <limits>	// std::numeric_limits<>
+#include <numeric>	// std::reduce()
+#include <vector>	// std::vector<>
 
 #define BOARD_MAX 3
 #define SENSOR_MAX 5
@@ -198,16 +200,27 @@ float *getValuesFromBoard(uint8_t board) {
 	return values;
 }
 
+float average(std::vector<float> const &v) {
+	if (v.empty())
+		return 0;
+
+	const float count = static_cast<float>(v.size());
+	return std::reduce(v.begin(), v.end()) / count;
+}
+
 int main(int argc, char **argv) {
+	std::vector<float> v;
 	float *values;
 	for (size_t board = 0; board < BOARD_MAX; board++) {
 		values = getValuesFromBoard(board);
 		printf("Answers from board %i:\n", board);
 		size_t j = 0;
 		while (!std::isnan(values[j])) {
+			v.push_back(values[j]);
 			printf("Sensor %i: %.2f\n", j, values[j++]);
 		}
 		free(values);
 	}
+	printf("Average: %.2f\n", average(v));
 	return 0;
 }

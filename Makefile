@@ -1,6 +1,6 @@
-CC = gcc
+CC = g++
 CFLAGS = -pedantic -Wall -Wformat=2 -Wshadow -Wconversion -g
-CPPFLAGS = -lstdc++ -std=c++20 -Wno-reorder
+CPPFLAGS = -std=c++20 -Wno-reorder #-lstdc++
 
 .PHONY: all clean run
 
