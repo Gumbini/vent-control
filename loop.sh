@@ -1,5 +1,5 @@
 while true; do
 	date
-	./vent
+	./vent-control
 	sleep 10
 done
