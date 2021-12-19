@@ -9,7 +9,7 @@ CPATH = ./src/c
 CXXPATH = ./src/cpp
 
 elf_name = vent-control
-elf_objects = main.cpp.o http-query.c.o utility.c.o utility.cpp.o
+elf_objects = main.cpp.o call-sip.c.o http-query.c.o utility.c.o utility.cpp.o
 
 # -----------------------------------------------------------------------
 
