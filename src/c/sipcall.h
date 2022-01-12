@@ -7,13 +7,13 @@ extern "C" {
 #endif
 
 typedef struct {
-	char *domain;
+	char *host;
 	char *user;
 	char *password;
 	char *number;
-} sip_data;
+} sipConfig_t;
 
-int callSip(const sip_data *config);
+int callSip(const sipConfig_t *config);
 
 #ifdef __cplusplus
 }
