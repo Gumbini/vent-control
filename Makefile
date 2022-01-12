@@ -1,15 +1,21 @@
 CC = gcc
 CXX = g++
 CFLAGS = -pedantic -Wall -Wformat=2 -Wshadow -Wconversion -std=gnu17
-CXXFLAGS = -pedantic -Wall -Wformat=2 -Wshadow -Wconversion -std=gnu++20 #-Wno-reorder
+CXXFLAGS = -pedantic -Wall -Wformat=2 -Wshadow -Wconversion -std=gnu++20
 
-BASEDIR = $(shell pwd)
-OBJPATH = ./objects
-CPATH = ./src/c
-CXXPATH = ./src/cpp
+BASEDIR = $(shell pwd)/
+
+OBJPATH = $(BASEDIR)/objects/
+CPATH = $(BASEDIR)/src/c/
+CXXPATH = $(BASEDIR)/src/cpp/
+PJPATH = $(BASEDIR)/pjproject-2.11.1
 
 elf_name = vent-control
-elf_objects = main.cpp.o call-sip.c.o http-query.c.o utility.c.o utility.cpp.o
+elf_objects = main.cpp.o http-query.c.o sipcall.c.o utility.c.o utility.cpp.o
+elf_libs = -lpj -lpjsua
+
+MAKEFLAGS += --jobs=$(shell nproc)
+MAKEFLAGS += --output-sync=target
 
 # -----------------------------------------------------------------------
 
@@ -21,29 +27,42 @@ vpath %.hpp $(CXXPATH)
 
 vpath %.o $(OBJPATH)
 
-DIRS = $(OBJPATH)
+.PHONY: all dirs clean debug init pjlib
 
-.PHONY: all $(DIRS) clean debug 
+# -----------------------------------------------------------------------
 
-all: $(OBJPATH) $(elf_name)
+all: $(elf_name)
+
+clean:
+	rm -f $(elf_name)
+	cd $(OBJPATH) && rm -f *.o
 
 debug: CFLAGS += -g
 debug: CXXFLAGS += -g
 debug: all
 
+# -----------------------------------------------------------------------
 
+init: dirs pjlib
 
-clean:
-	rm -f $(elf_name)
-	rm -f -d -r $(OBJPATH)
+dirs:
+	mkdir -p $(OBJPATH)
 
-$(DIRS):
-	mkdir -p $@
+pjlib:
+	cd $(PJPATH) \
+	&& ./configure --prefix=/usr --enable-shared --disable-video --disable-libwebrtc CFLAGS='-O2' \
+	&& $(MAKE) dep \
+	&& $(MAKE)
+	echo -e "\n\033[31mPlease run \"sudo make install\" in $(PJPATH) to install the library!\n"
 
+# -----------------------------------------------------------------------
 
 $(elf_name): $(elf_objects)
-	cd $(OBJPATH); \
-	$(CXX) -o $(BASEDIR)/$@ $^
+	cd $(OBJPATH) \
+	&& $(CXX) -o $(BASEDIR)/$@ $^ $(elf_libs)
+
+#sipcall.c.o: sipcall.c
+#	$(CC) $(CFLAGS) -c -I$(CPATH) $^ -o $(OBJPATH)/$@ -lpj -lpjsua -lpjmedia
 
 %.c.o: %.c 
 	$(CC) $(CFLAGS) -c -I$(CPATH) $^ -o $(OBJPATH)/$@
