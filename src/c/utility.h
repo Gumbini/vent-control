@@ -4,8 +4,7 @@
 
 #define CRLF "\r\n"
 
-#define S_MATCH_FIRST(X, Y, N) (!strncmp(X, Y, N))
-#define S_EQUALS(X, Y) (!strcmp(X, Y))
+#include "stringMacros.h"
 
 #ifdef __cplusplus
 extern "C" {

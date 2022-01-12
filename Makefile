@@ -11,7 +11,11 @@ CXXPATH = $(BASEDIR)/src/cpp/
 PJPATH = $(BASEDIR)/pjproject-2.11.1
 
 elf_name = vent-control
-elf_objects = main.cpp.o http-query.c.o sipcall.c.o utility.c.o utility.cpp.o
+
+cpp_objects = main.cpp.o utility.cpp.o
+c_objects = request.c.o sipcall.c.o utility.c.o
+
+elf_objects = $(cpp_objects) $(c_objects)
 elf_libs = -lpj -lpjsua
 
 MAKEFLAGS += --jobs=$(shell nproc)
