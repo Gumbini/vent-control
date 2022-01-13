@@ -16,7 +16,7 @@ static int connectTo(const char *restrict hostname, const char *restrict port) {
 		.ai_flags = AI_ADDRCONFIG,	 // Only locally available address types
 	};
 
-	struct addrinfo *head;
+	struct addrinfo *head = NULL;
 	int gai_result;
 	if ((gai_result = getaddrinfo(hostname, port, &hints, &head))) {
 		if (gai_result == EAI_SYSTEM)
@@ -24,7 +24,7 @@ static int connectTo(const char *restrict hostname, const char *restrict port) {
 		die(gai_strerror(gai_result));
 	}
 
-	int sock;
+	int sock = -1;
 	struct addrinfo *curr;
 	for (curr = head; curr != NULL; curr = curr->ai_next) {	 // Try connecting to the server
 		if ((sock = socket(curr->ai_family, curr->ai_socktype, curr->ai_protocol)) == -1)

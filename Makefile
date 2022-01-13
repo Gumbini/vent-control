@@ -1,7 +1,7 @@
 CC = gcc
 CXX = g++
-CFLAGS = -pedantic -Wall -Wformat=2 -Wshadow -Wconversion -std=gnu17
-CXXFLAGS = -pedantic -Wall -Wformat=2 -Wshadow -Wconversion -std=gnu++20
+CFLAGS = -pedantic -Wall -Wformat=2 -Wshadow -Wconversion -std=gnu17 -O2
+CXXFLAGS = -pedantic -Wall -Wformat=2 -Wshadow -Wconversion -std=gnu++20 -O2
 
 BASEDIR = $(shell pwd)/
 
@@ -12,7 +12,7 @@ PJPATH = $(BASEDIR)/pjproject-2.11.1
 
 elf_name = vent-control
 
-cpp_objects = main.cpp.o utility.cpp.o
+cpp_objects = main.cpp.o
 c_objects = request.c.o sipcall.c.o utility.c.o
 
 elf_objects = $(cpp_objects) $(c_objects)
