@@ -1,5 +1,7 @@
 #include "sipcall.h"
 
+#define PJ_AUTOCONF 1
+
 #include <pjsua-lib/pjsua.h>
 #include <signal.h>	 // sigaction()
 #include <stdio.h>	 // snprintf()
