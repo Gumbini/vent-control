@@ -13,7 +13,8 @@ PJPATH = $(BASEDIR)/pjproject-2.11.1
 elf_name = vent-control
 
 cpp_objects = main.cpp.o
-c_objects = request.c.o sipcall.c.o utility.c.o
+c_objects = request.c.o utility.c.o
+#c_objects = request.c.o sipcall.c.o utility.c.o
 
 elf_objects = $(cpp_objects) $(c_objects)
 elf_libs = -lpj -lpjsua
@@ -64,9 +65,6 @@ pjlib:
 $(elf_name): $(elf_objects)
 	cd $(OBJPATH) \
 	&& $(CXX) -o $(BASEDIR)/$@ $^ $(elf_libs)
-
-#sipcall.c.o: sipcall.c
-#	$(CC) $(CFLAGS) -c -I$(CPATH) $^ -o $(OBJPATH)/$@ -lpj -lpjsua -lpjmedia
 
 %.c.o: %.c 
 	$(CC) $(CFLAGS) -c -I$(CPATH) $^ -o $(OBJPATH)/$@
