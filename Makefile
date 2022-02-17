@@ -13,7 +13,8 @@ elf_name = vent-control
 
 modules = main.cpp.o request.c.o utility.c.o
 #modules = main.cpp.o request.c.o sipcall.c.o utility.c.o
-libraries = -lcurl -lpj -lpjsua
+libraries = -lcurl
+#libraries = -lcurl -lpj -lpjsua
 pj_path = $(basedir)/pjproject-2.11.1
 
 # -----------------------------------------------------------------------
@@ -29,7 +30,7 @@ vpath %.hpp $(include_path)
 
 vpath %.o   $(build_path)
 
-.PHONY: all dirs clean debug init pjlib
+.PHONY: all dirs clean debug init libcurl pjlib
 
 # -----------------------------------------------------------------------
 
@@ -45,10 +46,14 @@ debug: all
 
 # -----------------------------------------------------------------------
 
-init: dirs pjlib
+init: dirs libcurl pjlib
 
 dirs:
 	mkdir -p $(build_path)
+
+libcurl:
+	sudo apt update \
+	&& sudo apt install libcurl4-openssl-dev
 
 pjlib:
 	cd $(pj_path) \
