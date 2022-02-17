@@ -3,34 +3,31 @@ CXX = g++
 CFLAGS = -pedantic -Wall -Wformat=2 -Wshadow -Wconversion -std=gnu17 -O2
 CXXFLAGS = -pedantic -Wall -Wformat=2 -Wshadow -Wconversion -std=gnu++20 -O2
 
-BASEDIR = $(shell pwd)/
+basedir = $(shell pwd)/
 
-OBJPATH = $(BASEDIR)/objects/
-CPATH = $(BASEDIR)/src/c/
-CXXPATH = $(BASEDIR)/src/cpp/
-PJPATH = $(BASEDIR)/pjproject-2.11.1
+build_path = $(basedir)/build/
+include_path = $(basedir)/include/
+source_path = $(basedir)/src/
 
 elf_name = vent-control
 
-cpp_objects = main.cpp.o
-c_objects = request.c.o utility.c.o
-#c_objects = request.c.o sipcall.c.o utility.c.o
+modules = main.cpp.o request.c.o utility.c.o
+#modules = main.cpp.o request.c.o sipcall.c.o utility.c.o
+libraries = -lpj -lpjsua
+pj_path = $(basedir)/pjproject-2.11.1
 
-elf_objects = $(cpp_objects) $(c_objects)
-elf_libs = -lpj -lpjsua
+# -----------------------------------------------------------------------
 
 MAKEFLAGS += --jobs=$(shell nproc)
 MAKEFLAGS += --output-sync=target
 
-# -----------------------------------------------------------------------
+vpath %.c   $(source_path)
+vpath %.cpp $(source_path)
 
-vpath %.c $(CPATH)
-vpath %.h $(CPATH)
+vpath %.h   $(include_path)
+vpath %.hpp $(include_path)
 
-vpath %.cpp $(CXXPATH)
-vpath %.hpp $(CXXPATH)
-
-vpath %.o $(OBJPATH)
+vpath %.o   $(build_path)
 
 .PHONY: all dirs clean debug init pjlib
 
@@ -40,7 +37,7 @@ all: $(elf_name)
 
 clean:
 	rm -f $(elf_name)
-	cd $(OBJPATH) && rm -f *.o
+	rm -f $(build_path)/*.o
 
 debug: CFLAGS += -g
 debug: CXXFLAGS += -g
@@ -51,24 +48,31 @@ debug: all
 init: dirs pjlib
 
 dirs:
-	mkdir -p $(OBJPATH)
+	mkdir -p $(build_path)
 
 pjlib:
-	cd $(PJPATH) \
+	cd $(pj_path) \
 	&& ./configure --prefix=/usr --enable-shared --disable-video --disable-libwebrtc CFLAGS='-O2' \
 	&& $(MAKE) dep \
 	&& $(MAKE)
-	echo -e "\n\033[31mPlease run \"sudo make install\" in $(PJPATH) to install the library!\n"
+	echo -e "\n\033[31mPlease run \"sudo make install\" in $(pj_path) to install the library!\n"
 
 # -----------------------------------------------------------------------
 
-$(elf_name): $(elf_objects)
-	cd $(OBJPATH) \
-	&& $(CXX) -o $(BASEDIR)/$@ $^ $(elf_libs)
+main.cpp.o:  request.h stringMacros.h
+request.c.o: utility.h
+sipcall.c.o: utility.h
+#utility.c.o: ---
 
-%.c.o: %.c 
-	$(CC) $(CFLAGS) -c -I$(CPATH) $^ -o $(OBJPATH)/$@
+# -----------------------------------------------------------------------
 
-%.cpp.o: %.cpp 
-	$(CXX) $(CXXFLAGS) -c -I$(CPATH) -I$(CXXPATH) $^ -o $(OBJPATH)/$@
+$(elf_name): $(modules)
+	cd $(build_path) \
+	&& $(CXX) -o $(basedir)/$@ $^ $(libraries)
+
+%.c.o: %.c
+	$(CC) $(CFLAGS) -c -I$(include_path) $< -o $(build_path)/$@
+
+%.cpp.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c -I$(include_path) $< -o $(build_path)/$@
 

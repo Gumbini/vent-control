@@ -1,17 +1,17 @@
-#include <unistd.h>	 // sleep()
+#include <unistd.h> // sleep()
 
-#include <cerrno>	 // errno
-#include <cstdlib>	 // std::free()
-#include <cstring>	 // std::strerror()
-#include <iostream>	 // std::cout
-#include <numeric>	 // std::reduce()
-#include <vector>	 // std::vector
+#include <cerrno>   // errno
+#include <cstdlib>  // std::free()
+#include <cstring>  // std::strerror()
+#include <iostream> // std::cout
+#include <numeric>  // std::reduce()
+#include <vector>   // std::vector
 
-#include "request.h"	   // requestApi()
-#include "stringMacros.h"  // STRING_STARTS_WITH()
+#include "request.h"      // requestApi()
+#include "stringMacros.h" // STRING_STARTS_WITH()
 
 #define MAX_DEVIATION_FROM_AVERAGE_KELVIN (4.0F)
-#define MIN_TEMPERATURE_CELSIUS 20
+#define MIN_TEMPERATURE_CELSIUS           20
 
 #define SLEEP_AFTER_FAILURE_SEC 5
 #define SLEEP_AFTER_SUCCESS_SEC 15
@@ -26,8 +26,7 @@ namespace {
 			return 0;
 		}
 
-		return std::reduce(vec.begin(), vec.end()) /
-			   static_cast<T>(vec.size());
+		return std::reduce(vec.begin(), vec.end()) / static_cast<T>(vec.size());
 	}
 
 	bool buzz(requestInfo_t *reqInfo) {
@@ -48,17 +47,17 @@ namespace {
 		std::free(request);
 		return false;
 	}
-}  // namespace
+} // namespace
 
 int main(int argc, char **argv) {
 	requestInfo_t reqCelsius = {
-		.host = const_cast<char *>("172.28.116.0"),
-		.port = const_cast<char *>("80"),
+		.host    = const_cast<char *>("172.28.116.0"),
+		.port    = const_cast<char *>("80"),
 		.request = const_cast<char *>("SENSOR/TEMPERATURE/0/VALUE/C"),
 	};
 	requestInfo_t reqBuzzer = {
-		.host = const_cast<char *>("172.28.116.0"),
-		.port = const_cast<char *>("80"),
+		.host    = const_cast<char *>("172.28.116.0"),
+		.port    = const_cast<char *>("80"),
 		.request = const_cast<char *>("ACTOR/BUZZER/0/ON/1000"),
 	};
 
@@ -92,12 +91,11 @@ int main(int argc, char **argv) {
 			floatStorage.erase(floatStorage.begin());
 		}
 
-		floatStorage.push_back(value);	// Add new element at the end of the vector
+		floatStorage.push_back(value); // Add new element at the end of the vector
 
 		// Buzz if the value is below MIN_TEMPERATURE_CELSIUS
 		if (value < MIN_TEMPERATURE_CELSIUS) {
-			std::cout << "Actual value dropped below "
-					  << MIN_TEMPERATURE_CELSIUS << " C!" << std::endl;
+			std::cout << "Actual value dropped below " << MIN_TEMPERATURE_CELSIUS << " C!" << std::endl;
 
 			if (!buzz(&reqBuzzer)) {
 				sleep(SLEEP_AFTER_FAILURE_SEC);
@@ -115,8 +113,8 @@ int main(int argc, char **argv) {
 		// Buzz if the value deviates more than MAX_DEVIATION_FROM_AVERAGE_KELVIN from the average
 		// No std::abs() because it does not matter if it gets warmer at some point
 		if ((average - value) > MAX_DEVIATION_FROM_AVERAGE_KELVIN) {
-			std::cout << "Actual value deviated more than "
-					  << MAX_DEVIATION_FROM_AVERAGE_KELVIN << " K from the average!" << std::endl;
+			std::cout << "Actual value deviated more than " << MAX_DEVIATION_FROM_AVERAGE_KELVIN
+					  << " K from the average!" << std::endl;
 
 			if (!buzz(&reqBuzzer)) {
 				sleep(SLEEP_AFTER_FAILURE_SEC);

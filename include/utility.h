@@ -12,12 +12,12 @@ extern "C" {
 
 #include <stdio.h>
 
-void die(const char *msg);
+	void die(const char *msg);
 
-char *readLineAll(FILE *file);
+	char *readLineAll(FILE *file);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif	// UTILITY_H
+#endif // UTILITY_H

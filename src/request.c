@@ -1,19 +1,19 @@
 #include "request.h"
 
-#include <errno.h>		 // errno
-#include <netdb.h>		 // getaddrinfo()
-#include <stdio.h>		 // fdopen()
-#include <stdlib.h>		 // free()
-#include <sys/socket.h>	 // socket()
-#include <unistd.h>		 // dup()
+#include <errno.h>      // errno
+#include <netdb.h>      // getaddrinfo()
+#include <stdio.h>      // fdopen()
+#include <stdlib.h>     // free()
+#include <sys/socket.h> // socket()
+#include <unistd.h>     // dup()
 
 #include "utility.h"
 
 static int connectTo(const char *restrict hostname, const char *restrict port) {
 	struct addrinfo hints = {
-		.ai_socktype = SOCK_STREAM,	 // TCP
-		.ai_family = AF_UNSPEC,		 // Unspecified address familiy
-		.ai_flags = AI_ADDRCONFIG,	 // Only locally available address types
+		.ai_socktype = SOCK_STREAM,   // TCP
+		.ai_family   = AF_UNSPEC,     // Unspecified address familiy
+		.ai_flags    = AI_ADDRCONFIG, // Only locally available address types
 	};
 
 	struct addrinfo *head = NULL;
@@ -26,7 +26,7 @@ static int connectTo(const char *restrict hostname, const char *restrict port) {
 
 	int sock = -1;
 	struct addrinfo *curr;
-	for (curr = head; curr != NULL; curr = curr->ai_next) {	 // Try connecting to the server
+	for (curr = head; curr != NULL; curr = curr->ai_next) { // Try connecting to the server
 		if ((sock = socket(curr->ai_family, curr->ai_socktype, curr->ai_protocol)) == -1)
 			continue;
 		if (!connect(sock, curr->ai_addr, curr->ai_addrlen))
@@ -34,19 +34,19 @@ static int connectTo(const char *restrict hostname, const char *restrict port) {
 		close(sock);
 	}
 
-	freeaddrinfo(head);	 // Free memory allocated by getaddrinfo()
+	freeaddrinfo(head); // Free memory allocated by getaddrinfo()
 
 	if (sock == -1)
 		die("socket");
 
-	if (curr == NULL)  // No usable address found
+	if (curr == NULL) // No usable address found
 		return -1;
 
 	return sock;
 }
 
 static void initFileDescriptors(FILE **rx, FILE **tx, int sock) {
-	int sock_copy = dup(sock);	// Duplicate the file descriptor to avoid buffering issues
+	int sock_copy = dup(sock); // Duplicate the file descriptor to avoid buffering issues
 	if (sock_copy == -1)
 		die("dup");
 
@@ -62,7 +62,7 @@ static void initFileDescriptors(FILE **rx, FILE **tx, int sock) {
 int requestApi(requestInfo_t *reqInfo, char **reqStorage) {
 	FILE *rx = NULL;
 	FILE *tx = NULL;
-	int sock = connectTo(reqInfo->host, reqInfo->port);	 // Never fails
+	int sock = connectTo(reqInfo->host, reqInfo->port); // Never fails
 	if (sock == -1) {
 		// errno set by connectTo
 		return 0;
@@ -77,7 +77,7 @@ int requestApi(requestInfo_t *reqInfo, char **reqStorage) {
 	while (1) {
 		msg = readLineAll(rx);
 		if (msg == NULL) {
-			if (fclose(rx))	 // Close file descriptors
+			if (fclose(rx)) // Close file descriptors
 				die("fclose");
 			if (fclose(tx))
 				die("fclose");
@@ -106,7 +106,7 @@ int requestApi(requestInfo_t *reqInfo, char **reqStorage) {
 		break;
 	}
 
-	if (fclose(rx))	 // Close file descriptors
+	if (fclose(rx)) // Close file descriptors
 		die("fclose");
 	if (fclose(tx))
 		die("fclose");

@@ -3,11 +3,11 @@
 #define PJ_AUTOCONF 1
 
 #include <pjsua-lib/pjsua.h>
-#include <signal.h>	 // sigaction()
-#include <stdio.h>	 // snprintf()
-#include <unistd.h>	 // sleep()
+#include <signal.h> // sigaction()
+#include <stdio.h>  // snprintf()
+#include <unistd.h> // sleep()
 
-#include "utility.h"  // die()
+#include "utility.h" // die()
 
 static void callbackCallStateChange(pjsua_call_id callId, pjsip_event *event);
 
@@ -18,7 +18,6 @@ static void sipSetup();
 
 ////////////////////////////////////////////////////////////////////////////////////
 
-// main application
 int callSip(const sipConfig_t *config) {
 	if (config->host == NULL)
 		return -1;
@@ -31,7 +30,7 @@ int callSip(const sipConfig_t *config) {
 
 	struct sigaction sig = {
 		.sa_handler = &sipHangup,
-		.sa_flags = SA_RESTART,
+		.sa_flags   = SA_RESTART,
 	};
 	sigaction(SIGINT, &sig, NULL);
 
@@ -53,7 +52,6 @@ static void callbackCallStateChange(pjsua_call_id callId, pjsip_event *event) {
 	pjsua_call_info callInfo;
 	pjsua_call_get_info(callId, &callInfo);
 
-	// check call state
 	if (callInfo.state == PJSIP_INV_STATE_CONFIRMED) {
 		printf("Call confirmed.\n");
 	}
@@ -92,14 +90,14 @@ static pjsua_acc_id sipRegister(const sipConfig_t *config) {
 	sprintf(sipUserUrl, "sip:%s@%s", config->user, config->host);
 	sprintf(sipProviderUrl, "sip:%s", config->host);
 
-	accCfg.id = pj_str(sipUserUrl);
-	accCfg.reg_uri = pj_str(sipProviderUrl);
-	accCfg.cred_count = 1;
-	accCfg.cred_info[0].realm = pj_str(config->host);
-	accCfg.cred_info[0].scheme = pj_str("digest");
-	accCfg.cred_info[0].username = pj_str(config->user);
+	accCfg.id                     = pj_str(sipUserUrl);
+	accCfg.reg_uri                = pj_str(sipProviderUrl);
+	accCfg.cred_count             = 1;
+	accCfg.cred_info[0].realm     = pj_str(config->host);
+	accCfg.cred_info[0].scheme    = pj_str("digest");
+	accCfg.cred_info[0].username  = pj_str(config->user);
 	accCfg.cred_info[0].data_type = PJSIP_CRED_DATA_PLAIN_PASSWD;
-	accCfg.cred_info[0].data = pj_str(config->password);
+	accCfg.cred_info[0].data      = pj_str(config->password);
 
 	pjsua_acc_id accId;
 	if (pjsua_acc_add(&accCfg, PJ_TRUE, &accId) != PJ_SUCCESS)
@@ -113,26 +111,26 @@ static void sipSetup() {
 	if (pjsua_create() != PJ_SUCCESS)
 		die("pjsua_create");
 
-	// configure pjsua
+	// Configure pjsua
 	pjsua_config pjsuaCfg;
 	pjsua_config_default(&pjsuaCfg);
 
-	// enable one simultaneous call
+	// Enable one simultaneous call
 	pjsuaCfg.max_calls = 1;
 
-	// callback configuration
+	// Callback configuration
 	pjsuaCfg.cb.on_call_state = &callbackCallStateChange;
 
-	// logging configuration
+	// Logging configuration
 	pjsua_logging_config logCfg;
 	pjsua_logging_config_default(&logCfg);
-	logCfg.console_level = 0;  // no logging
+	logCfg.console_level = 0; // no logging
 
-	// initialize pjsua
+	// Initialize pjsua
 	if (pjsua_init(&pjsuaCfg, &logCfg, NULL) != PJ_SUCCESS)
 		die("pjsua_init");
 
-	// add UDP transport
+	// Add UDP transport
 	pjsua_transport_config udpCfg;
 	pjsua_transport_config_default(&udpCfg);
 	udpCfg.port = 5060;
@@ -140,11 +138,11 @@ static void sipSetup() {
 	if (pjsua_transport_create(PJSIP_TRANSPORT_UDP, &udpCfg, NULL) != PJ_SUCCESS)
 		die("pjsua_transport_create");
 
-	// start pjsua
+	// Start pjsua
 	if (pjsua_start() != PJ_SUCCESS)
 		die("pjsua_start");
 
-	// disable sound - use null sound device
+	// Disable sound - use null sound device
 	if (pjsua_set_null_snd_dev() != PJ_SUCCESS)
 		die("pjsua_set_null_snd_dev");
 }
