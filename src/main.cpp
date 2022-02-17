@@ -29,9 +29,22 @@ namespace {
 		return std::reduce(vec.begin(), vec.end()) / static_cast<T>(vec.size());
 	}
 
-	bool buzz(requestInfo_t *reqInfo) {
-		char *request;
-		if (requestApi(reqInfo, &request) == 0) {
+	char *requestFirstLine(const char *url) {
+		char *response = requestUrl(url);
+
+		if (response == nullptr) {
+			return nullptr;
+		}
+
+		*(strchrnul(response, '\r')) = '\0';
+		*(strchrnul(response, '\n')) = '\0';
+
+		return response;
+	}
+
+	bool buzz() {
+		char *request = requestFirstLine("http://172.28.116.0/ACTOR/BUZZER/0/ON/1000");
+		if (request == nullptr) {
 			std::cerr << "Buzzing request failed! - " << std::strerror(errno) << std::endl;
 			errno = 0;
 			return false;
@@ -47,26 +60,15 @@ namespace {
 		std::free(request);
 		return false;
 	}
+
 } // namespace
 
 int main(int argc, char **argv) {
-	requestInfo_t reqCelsius = {
-		.host    = const_cast<char *>("172.28.116.0"),
-		.port    = const_cast<char *>("80"),
-		.request = const_cast<char *>("SENSOR/TEMPERATURE/0/VALUE/C"),
-	};
-	requestInfo_t reqBuzzer = {
-		.host    = const_cast<char *>("172.28.116.0"),
-		.port    = const_cast<char *>("80"),
-		.request = const_cast<char *>("ACTOR/BUZZER/0/ON/1000"),
-	};
-
 	std::vector<float> floatStorage;
 
 	while (1) {
-		char *request;
-
-		if (requestApi(&reqCelsius, &request) == 0) {
+		char *request = requestFirstLine("http://172.28.116.0/SENSOR/TEMPERATURE/0/VALUE/C");
+		if (request == nullptr) {
 			std::cerr << "Temperature request failed! - " << std::strerror(errno) << std::endl;
 			errno = 0;
 			sleep(SLEEP_AFTER_FAILURE_SEC);
@@ -97,7 +99,7 @@ int main(int argc, char **argv) {
 		if (value < MIN_TEMPERATURE_CELSIUS) {
 			std::cout << "Actual value dropped below " << MIN_TEMPERATURE_CELSIUS << " C!" << std::endl;
 
-			if (!buzz(&reqBuzzer)) {
+			if (!buzz()) {
 				sleep(SLEEP_AFTER_FAILURE_SEC);
 				continue;
 			}
@@ -116,7 +118,7 @@ int main(int argc, char **argv) {
 			std::cout << "Actual value deviated more than " << MAX_DEVIATION_FROM_AVERAGE_KELVIN
 					  << " K from the average!" << std::endl;
 
-			if (!buzz(&reqBuzzer)) {
+			if (!buzz()) {
 				sleep(SLEEP_AFTER_FAILURE_SEC);
 				continue;
 			}

@@ -13,7 +13,7 @@ elf_name = vent-control
 
 modules = main.cpp.o request.c.o utility.c.o
 #modules = main.cpp.o request.c.o sipcall.c.o utility.c.o
-libraries = -lpj -lpjsua
+libraries = -lcurl -lpj -lpjsua
 pj_path = $(basedir)/pjproject-2.11.1
 
 # -----------------------------------------------------------------------
@@ -60,7 +60,7 @@ pjlib:
 # -----------------------------------------------------------------------
 
 main.cpp.o:  request.h stringMacros.h
-request.c.o: utility.h
+#request.c.o: ---
 sipcall.c.o: utility.h
 #utility.c.o: ---
 
